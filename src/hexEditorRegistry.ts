@@ -127,7 +127,7 @@ export class HexEditorRegistry extends Disposable {
 		}
 
 		this._activeDocument = next;
-		vscode.commands.executeCommand("setContext", "hexEditor:isActive", !!next);
+		vscode.commands.executeCommand("setContext", "hexEditorFay:isActive", !!next);
 		this.onChangeEmitter.fire(next);
 	}
 }

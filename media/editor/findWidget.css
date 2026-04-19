@@ -3,7 +3,7 @@
 	top: 0;
 	right: 28px;
 	width: 50%;
-	max-width: 420px;
+	max-width: 600px;
 	transform: translateY(-100%);
 	transition: transform 300ms;
 	border: 1px solid var(--vscode-contrastBorder);

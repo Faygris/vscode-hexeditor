@@ -13,7 +13,7 @@ import { accessFile } from "../fileSystemAdaptor";
 let testFiles: string[] = [];
 
 export const getTempFile = async (initialContents?: Uint8Array): Promise<vscode.Uri> => {
-	const fname = join(tmpdir(), `vscode-hexeditor-test-${randomBytes(8).toString("hex")}.bin`);
+	const fname = join(tmpdir(), `vscode-hexeditorfay-test-${randomBytes(8).toString("hex")}.bin`);
 	testFiles.push(fname);
 	if (initialContents) {
 		await fs.writeFile(fname, initialContents);

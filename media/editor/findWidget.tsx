@@ -13,11 +13,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { HexDocumentEditOp, HexDocumentReplaceEdit } from "../../shared/hexDocumentModel";
 import {
-    LiteralSearchQuery,
-    MessageType,
-    SearchRequestMessage,
-    SearchResult,
-    SearchResultsWithProgress,
+	LiteralSearchQuery,
+	MessageType,
+	ReadRangeResponseMessage,
+	SearchRequestMessage,
+	SearchResult,
+	SearchResultsWithProgress,
 } from "../../shared/protocol";
 import { placeholder1 } from "../../shared/strings";
 import { Range } from "../../shared/util/range";
@@ -166,11 +167,72 @@ export const FindWidget: React.FC = () => {
 		[],
 	);
 
+	/* Utility: convert bytes to spaced hex string */
+	const bytesToHex = (u8: Uint8Array) =>
+		Array.from(u8)
+			.map(b => b.toString(16).padStart(2, "0"))
+			.join(" ");
+
+	/* Utility: check printable ascii */
+	const isPrintableAscii = (u8: Uint8Array) => Array.from(u8).every(b => b >= 32 && b <= 126);
+
+	// Prefill the find box with the current selection if present and the query is empty.
+	const prefillFromSelection = useCallback(async () => {
+		try {
+			// Only prefill when query is empty to avoid stomping user input
+			if (query && query.length > 0) {
+				return;
+			}
+
+			const ranges = ctx.getSelectionRanges();
+			if (!ranges || ranges.length === 0) {
+				return;
+			}
+
+			// Use the first range (you can expand this to join ranges if desired)
+			const r = ranges[0];
+			const bytesToRead = r.size;
+			if (bytesToRead <= 0) {
+				return;
+			}
+
+			// ask extension host for the bytes
+			const resp = await select.messageHandler.sendRequest<ReadRangeResponseMessage>({
+				type: MessageType.ReadRangeRequest,
+				offset: r.start,
+				bytes: bytesToRead,
+			});
+
+			const bytes = new Uint8Array(resp.data);
+
+			if (isBinaryMode) {
+				setQuery(bytesToHex(bytes));
+			} else {
+				if (isPrintableAscii(bytes)) {
+					setQuery(new TextDecoder().decode(bytes));
+				} else {
+					// fallback to hex if not printable
+					setQuery(bytesToHex(bytes));
+				}
+			}
+
+			// focus and select the prefilling text so user can immediately modify it
+			setTimeout(() => textFieldRef.current?.select(), 0);
+		} catch {
+			// ignore any prefill errors
+			// console.warn("prefillFromSelection failed", e);
+		}
+	}, [ctx, isBinaryMode, query, setQuery]);
+
 	useEffect(() => {
 		const l = (evt: KeyboardEvent) => {
 			if ((evt.key === "f" || evt.key === "F") && (evt.metaKey || evt.ctrlKey)) {
 				setVisible(true);
 				previouslyFocusedElement.current = ctx.focusedElement;
+
+				// prefill from selection
+				prefillFromSelection();
+
 				textFieldRef.current?.focus();
 				evt.preventDefault();
 			}
