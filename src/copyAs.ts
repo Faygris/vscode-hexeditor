@@ -36,7 +36,7 @@ export const copyAs = async (messaging: ExtensionHostMessageHandler): Promise<vo
 	vscode.window.showQuickPick(formats).then(format => {
 		if (format?.label == formats.at(-1)?.label) {
 			vscode.commands.executeCommand("workbench.action.openSettings2", {
-				query: "@id:hexeditorfay.copyType",
+				query: "@id:hexeditor.copyType",
 			});
 		} else if (format) {
 			messaging.sendEvent({ type: MessageType.TriggerCopyAs, format: format["label"] });

@@ -1,9 +1,10 @@
+/* Add a small left-side resizer and ensure wrapper is sized by the inline width */
 .wrapper {
 	position: absolute;
 	top: 0;
 	right: 28px;
-	width: 50%;
-	max-width: 600px;
+	/* width is now controlled via inline style (from persisted widthPx) */
+	max-width: 90%;
 	transform: translateY(-100%);
 	transition: transform 300ms;
 	border: 1px solid var(--vscode-contrastBorder);
@@ -12,6 +13,31 @@
 	padding: 2px;
 	z-index: 1;
 	display: flex;
+}
+
+/* Left-side resizer: small, full height, draggable */
+.resizer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 8px;
+	cursor: ew-resize;
+	/* make the resizer hit-target invisible but accessible: */
+	background: linear-gradient(90deg, rgba(0, 0, 0, 0.03), transparent);
+	z-index: 2;
+}
+
+/* make sure the controls container leaves space for the resizer */
+.controls-container {
+	width: 0;
+	flex-grow: 1;
+	margin-left: 8px; /* leave room for the resizer */
+}
+
+/* keep the text-field flexible */
+.text-field {
+	flex-grow: 1;
 }
 
 .input-row {
@@ -43,13 +69,4 @@
 	height: initial !important;
 	margin: 1px !important;
 	padding: 0 !important;
-}
-
-.controls-container {
-	width: 0;
-	flex-grow: 1;
-}
-
-.text-field {
-	flex-grow: 1;
 }

@@ -32,7 +32,7 @@ function reopenWithHexEditor() {
 		uri: vscode.Uri | undefined;
 	};
 	if (activeTabInput.uri) {
-		vscode.commands.executeCommand("vscode.openWith", activeTabInput.uri, "hexEditorFay.hexedit");
+		vscode.commands.executeCommand("vscode.openWith", activeTabInput.uri, "hexEditor.hexedit");
 	}
 }
 
@@ -54,17 +54,17 @@ export async function activate(context: vscode.ExtensionContext) {
 	const telemetryReporter = new TelemetryReporter(configValues.aiKey);
 	context.subscriptions.push(telemetryReporter);
 	const openWithCommand = vscode.commands.registerCommand(
-		"hexEditorFay.openFile",
+		"hexEditor.openFile",
 		reopenWithHexEditor,
 	);
-	const goToOffsetCommand = vscode.commands.registerCommand("hexEditorFay.goToOffset", () => {
+	const goToOffsetCommand = vscode.commands.registerCommand("hexEditor.goToOffset", () => {
 		const first = registry.activeMessaging[Symbol.iterator]().next();
 		if (first.value) {
 			showGoToOffset(first.value);
 		}
 	});
 	const selectBetweenOffsetsCommand = vscode.commands.registerCommand(
-		"hexEditorFay.selectBetweenOffsets",
+		"hexEditor.selectBetweenOffsets",
 		() => {
 			const first = registry.activeMessaging[Symbol.iterator]().next();
 			if (first.value) {
@@ -73,26 +73,23 @@ export async function activate(context: vscode.ExtensionContext) {
 		},
 	);
 
-	const copyAsCommand = vscode.commands.registerCommand("hexEditorFay.copyAs", () => {
+	const copyAsCommand = vscode.commands.registerCommand("hexEditor.copyAs", () => {
 		const first = registry.activeMessaging[Symbol.iterator]().next();
 		if (first.value) {
 			copyAs(first.value);
 		}
 	});
 
-	const switchEditModeCommand = vscode.commands.registerCommand(
-		"hexEditorFay.switchEditMode",
-		() => {
-			if (registry.activeDocument) {
-				registry.activeDocument.editMode =
-					registry.activeDocument.editMode === HexDocumentEditOp.Insert
-						? HexDocumentEditOp.Replace
-						: HexDocumentEditOp.Insert;
-			}
-		},
-	);
+	const switchEditModeCommand = vscode.commands.registerCommand("hexEditor.switchEditMode", () => {
+		if (registry.activeDocument) {
+			registry.activeDocument.editMode =
+				registry.activeDocument.editMode === HexDocumentEditOp.Insert
+					? HexDocumentEditOp.Replace
+					: HexDocumentEditOp.Insert;
+		}
+	});
 
-	const copyOffsetAsHex = vscode.commands.registerCommand("hexEditorFay.copyOffsetAsHex", () => {
+	const copyOffsetAsHex = vscode.commands.registerCommand("hexEditor.copyOffsetAsHex", () => {
 		if (registry.activeDocument) {
 			const focused = registry.activeDocument.selectionState.focused;
 			if (focused !== undefined) {
@@ -101,7 +98,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const copyOffsetAsDec = vscode.commands.registerCommand("hexEditorFay.copyOffsetAsDec", () => {
+	const copyOffsetAsDec = vscode.commands.registerCommand("hexEditor.copyOffsetAsDec", () => {
 		if (registry.activeDocument) {
 			const focused = registry.activeDocument.selectionState.focused;
 			if (focused !== undefined) {
@@ -111,7 +108,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const compareSelectedCommand = vscode.commands.registerCommand(
-		"hexEditorFay.compareSelected",
+		"hexEditor.compareSelected",
 		async (...args) => {
 			if (args.length !== 2 && !(args[1] instanceof Array)) {
 				return;

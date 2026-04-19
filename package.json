@@ -1,5 +1,5 @@
 {
-  "name": "hexeditorfay",
+  "name": "hexeditor",
   "displayName": "%name%",
   "description": "%description%",
   "version": "1.11.1",
@@ -35,7 +35,7 @@
       {
         "title": "%name%",
         "properties": {
-          "hexeditorfay.inspectorType": {
+          "hexeditor.inspectorType": {
             "type": "string",
             "enum": [
               "aside",
@@ -43,36 +43,36 @@
               "sidebar"
             ],
             "default": "aside",
-            "description": "%hexeditorfay.inspectorType%"
+            "description": "%hexeditor.inspectorType%"
           },
-          "hexeditorfay.maxFileSize": {
+          "hexeditor.maxFileSize": {
             "type": "number",
             "minimum": 0,
             "default": 10,
-            "description": "%hexeditorfay.maxFileSize%"
+            "description": "%hexeditor.maxFileSize%"
           },
-          "hexeditorfay.dataInspector.autoReveal": {
+          "hexeditor.dataInspector.autoReveal": {
             "type": "boolean",
             "default": true,
-            "description": "%hexeditorfay.dataInspector.autoReveal%"
+            "description": "%hexeditor.dataInspector.autoReveal%"
           },
-          "hexeditorfay.defaultEndianness": {
+          "hexeditor.defaultEndianness": {
             "type": "string",
             "default": "little",
             "enum": [
               "little",
               "big"
             ],
-            "description": "%hexeditorfay.defaultEndianness%"
+            "description": "%hexeditor.defaultEndianness%"
           },
-          "hexeditorfay.columnWidth": {
+          "hexeditor.columnWidth": {
             "type": "integer",
             "default": 16,
             "minimum": 1,
             "maximum": 512,
-            "description": "%hexeditorfay.columnWidth%"
+            "description": "%hexeditor.columnWidth%"
           },
-          "hexeditorfay.copyType": {
+          "hexeditor.copyType": {
             "type": "string",
             "enum": [
               "Hex Octets",
@@ -86,29 +86,29 @@
               "Base64"
             ],
             "default": "Hex Octets",
-            "description": "%hexeditorfay.copyType%"
+            "description": "%hexeditor.copyType%"
           },
-          "hexeditorfay.showDecodedText": {
+          "hexeditor.showDecodedText": {
             "type": "boolean",
             "default": true,
-            "description": "%hexeditorfay.showDecodedText%"
+            "description": "%hexeditor.showDecodedText%"
           },
-          "hexeditorfay.showOpenFileButton": {
+          "hexeditor.showOpenFileButton": {
             "type": "boolean",
             "default": false,
-            "description": "%hexeditorfay.showOpenFileButton%"
+            "description": "%hexeditor.showOpenFileButton%"
           }
         }
       }
     ],
     "configurationDefaults": {
       "workbench.editorAssociations": {
-        "{hexdiff}:/**/*.*": "hexEditorFay.hexedit"
+        "{hexdiff}:/**/*.*": "hexEditor.hexedit"
       }
     },
     "customEditors": [
       {
-        "viewType": "hexEditorFay.hexedit",
+        "viewType": "hexEditor.hexedit",
         "displayName": "%name%",
         "selector": [
           {
@@ -120,45 +120,45 @@
     ],
     "commands": [
       {
-        "command": "hexEditorFay.openFile",
+        "command": "hexEditor.openFile",
         "category": "%name%",
-        "title": "%hexEditorFay.openFile%",
+        "title": "%hexEditor.openFile%",
         "icon": "$(file-binary)"
       },
       {
-        "command": "hexEditorFay.goToOffset",
+        "command": "hexEditor.goToOffset",
         "category": "%name%",
-        "title": "%hexEditorFay.goToOffset%"
+        "title": "%hexEditor.goToOffset%"
       },
       {
-        "command": "hexEditorFay.selectBetweenOffsets",
+        "command": "hexEditor.selectBetweenOffsets",
         "category": "%name%",
-        "title": "%hexEditorFay.selectBetweenOffsets%"
+        "title": "%hexEditor.selectBetweenOffsets%"
       },
       {
-        "command": "hexEditorFay.copyAs",
+        "command": "hexEditor.copyAs",
         "category": "%name%",
-        "title": "%hexEditorFay.copyAs%"
+        "title": "%hexEditor.copyAs%"
       },
       {
-        "command": "hexEditorFay.switchEditMode",
+        "command": "hexEditor.switchEditMode",
         "category": "%name%",
-        "title": "%hexEditorFay.switchEditMode%"
+        "title": "%hexEditor.switchEditMode%"
       },
       {
-        "command": "hexEditorFay.copyOffsetAsHex",
+        "command": "hexEditor.copyOffsetAsHex",
         "category": "%name%",
-        "title": "%hexEditorFay.copyOffsetAsHex%"
+        "title": "%hexEditor.copyOffsetAsHex%"
       },
       {
-        "command": "hexEditorFay.copyOffsetAsDec",
+        "command": "hexEditor.copyOffsetAsDec",
         "category": "%name%",
-        "title": "%hexEditorFay.copyOffsetAsDec%"
+        "title": "%hexEditor.copyOffsetAsDec%"
       },
       {
-        "command": "hexEditorFay.compareSelected",
+        "command": "hexEditor.compareSelected",
         "category": "%name%",
-        "title": "%hexEditorFay.compareSelected%"
+        "title": "%hexEditor.compareSelected%"
       }
     ],
     "viewsContainers": {
@@ -167,7 +167,7 @@
           "id": "hexExplorer",
           "title": "%name%",
           "icon": "panel-icon.svg",
-          "when": "hexEditorFay:showSidebarInspector"
+          "when": "hexEditor:showSidebarInspector"
         }
       ]
     },
@@ -175,54 +175,54 @@
       "hexExplorer": [
         {
           "type": "webview",
-          "id": "hexEditorFay.dataInspectorView",
+          "id": "hexEditor.dataInspectorView",
           "name": "%dataInspectorView%",
-          "when": "hexEditorFay:showSidebarInspector"
+          "when": "hexEditor:showSidebarInspector"
         }
       ]
     },
     "menus": {
       "commandPalette": [
         {
-          "command": "hexEditorFay.goToOffset",
-          "when": "hexEditorFay:isActive"
+          "command": "hexEditor.goToOffset",
+          "when": "hexEditor:isActive"
         },
         {
-          "command": "hexEditorFay.switchEditMode",
-          "when": "hexEditorFay:isActive"
+          "command": "hexEditor.switchEditMode",
+          "when": "hexEditor:isActive"
         },
         {
-          "command": "hexEditorFay.compareSelected",
+          "command": "hexEditor.compareSelected",
           "when": "false"
         }
       ],
       "editor/title": [
         {
-          "command": "hexEditorFay.openFile",
+          "command": "hexEditor.openFile",
           "group": "navigation@1",
-          "when": "activeEditor && config.hexeditorfay.showOpenFileButton"
+          "when": "activeEditor && config.hexeditor.showOpenFileButton"
         }
       ],
       "webview/context": [
         {
-          "command": "hexEditorFay.copyOffsetAsDec",
+          "command": "hexEditor.copyOffsetAsDec",
           "group": "9_cutcopypaste",
-          "when": "hexEditorFay:isActive"
+          "when": "hexEditor:isActive"
         },
         {
-          "command": "hexEditorFay.copyOffsetAsHex",
+          "command": "hexEditor.copyOffsetAsHex",
           "group": "9_cutcopypaste",
-          "when": "hexEditorFay:isActive"
+          "when": "hexEditor:isActive"
         },
         {
-          "when": "webviewId == 'hexEditorFay.hexedit'",
-          "command": "hexEditorFay.copyAs",
+          "when": "webviewId == 'hexEditor.hexedit'",
+          "command": "hexEditor.copyAs",
           "group": "9_cutcopypaste"
         }
       ],
       "explorer/context": [
         {
-          "command": "hexEditorFay.compareSelected",
+          "command": "hexEditor.compareSelected",
           "group": "3_compare@30",
           "when": "listDoubleSelection"
         }
@@ -230,19 +230,19 @@
     },
     "keybindings": [
       {
-        "command": "hexEditorFay.goToOffset",
+        "command": "hexEditor.goToOffset",
         "key": "ctrl+g",
-        "when": "activeCustomEditorId == hexEditorFay.hexedit"
+        "when": "activeCustomEditorId == hexEditor.hexedit"
       },
       {
-        "command": "hexEditorFay.copyAs",
+        "command": "hexEditor.copyAs",
         "key": "alt+ctrl+c",
-        "when": "activeCustomEditorId == hexEditorFay.hexedit"
+        "when": "activeCustomEditorId == hexEditor.hexedit"
       },
       {
-        "command": "hexEditorFay.switchEditMode",
+        "command": "hexEditor.switchEditMode",
         "key": "Insert",
-        "when": "hexEditorFay:isActive"
+        "when": "hexEditor:isActive"
       }
     ]
   },

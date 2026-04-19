@@ -130,6 +130,14 @@ export const FindWidget: React.FC = () => {
 	const [results, setResults] = useRecoilState(select.searchResults);
 	const [selectedResult, setSelectedResult] = useState<number>();
 	const [offset, setOffset] = useRecoilState(select.offset);
+	// NEW: persisted width in px
+	const [widthPx, setWidthPx] = usePersistedState("find.widthPx", 420);
+	const wrapperRef = useRef<HTMLDivElement | null>(null);
+	const resizerActiveRef = useRef(false);
+	const resizerStartXRef = useRef(0);
+	const resizerStartWidthRef = useRef(0);
+	const minWidth = 240;
+	const maxWidth = Math.max(360, Math.round(window.innerWidth * 0.9));
 	const dimensions = useRecoilValue(select.dimensions);
 	const columnWidth = useRecoilValue(select.columnWidth);
 	const ctx = useDisplayContext();
@@ -230,7 +238,6 @@ export const FindWidget: React.FC = () => {
 				setVisible(true);
 				previouslyFocusedElement.current = ctx.focusedElement;
 
-				// prefill from selection
 				prefillFromSelection();
 
 				textFieldRef.current?.focus();
@@ -242,10 +249,46 @@ export const FindWidget: React.FC = () => {
 		return () => window.removeEventListener("keydown", l);
 	}, []);
 
+	/* Resizer mouse handlers */
+	const onResizerMouseDown = (ev: React.MouseEvent) => {
+		ev.preventDefault();
+		resizerActiveRef.current = true;
+		resizerStartXRef.current = ev.clientX;
+		resizerStartWidthRef.current = widthPx;
+		// prevent text selection while resizing
+		document.body.style.userSelect = "none";
+
+		const onMove = (me: MouseEvent) => {
+			const dx = resizerStartXRef.current - me.clientX;
+			const nextWidth = Math.min(
+				maxWidth,
+				Math.max(minWidth, Math.round(resizerStartWidthRef.current + dx)),
+			);
+			setWidthPx(nextWidth);
+		};
+
+		const onUp = () => {
+			resizerActiveRef.current = false;
+			document.removeEventListener("mousemove", onMove);
+			document.removeEventListener("mouseup", onUp);
+			document.body.style.userSelect = "";
+		};
+
+		document.addEventListener("mousemove", onMove);
+		document.addEventListener("mouseup", onUp);
+	};
+
 	useEffect(() => {
 		if (!query.length) {
 			return;
 		}
+
+		console.log(isBinaryMode);
+		console.log(query);
+
+		// if (!isBinaryMode && parseHexStringWithPlaceholders(query)) {
+		// 	setIsBinaryMode(true);
+		// }
 
 		if (typeof queryOrError === "string") {
 			return;
@@ -405,9 +448,17 @@ export const FindWidget: React.FC = () => {
 
 	return (
 		<div
+			ref={wrapperRef}
 			tabIndex={visible ? undefined : -1}
 			className={clsx(style.wrapper, visible && style.visible)}
+			style={{ width: `${widthPx}px` } as React.CSSProperties} // new inline width
 		>
+			<div
+				className={style.resizer}
+				onMouseDown={onResizerMouseDown}
+				role="separator"
+				aria-orientation="horizontal"
+			/>
 			{results.progress < 1 && <VsProgressIndicator />}
 			{!ctx.isReadonly && (
 				<VsIconButton

@@ -2,22 +2,22 @@
 
 There are many ways to contribute to the Visual Studio Code Hex Editor project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
 
-After cloning and building the repo, check out the [issues list](https://github.com/microsoft/vscode-hexeditorfay/issues?q=is%3Aissue+is%3Aopen+).
+After cloning and building the repo, check out the [issues list](https://github.com/microsoft/vscode-hexeditor/issues?q=is%3Aissue+is%3Aopen+).
 
 ### Getting the sources
 
 First, fork the VS Code Hex Editor repository so that you can make a pull request. Then, clone your fork locally:
 
 ```
-git clone https://github.com/<<<your-github-account>>>/vscode-hexeditorfay.git
+git clone https://github.com/<<<your-github-account>>>/vscode-hexeditor.git
 ```
 
 Occasionally you will want to merge changes in the upstream repository (the official code repo) with your fork.
 
 ```
-cd vscode-hexeditorfay
+cd vscode-hexeditor
 git checkout main
-git pull https://github.com/microsoft/vscode-hexeditorfay.git main
+git pull https://github.com/microsoft/vscode-hexeditor.git main
 ```
 
 Manage any merge conflicts, commit them, and then push them to your fork.
@@ -32,7 +32,7 @@ You'll need the following tools:
 - [Node.JS](https://nodejs.org/en/), **x64**, version `>= 12.x`
 
 ```
-cd vscode-hexeditorfay
+cd vscode-hexeditor
 npm install
 ```
 
@@ -47,11 +47,11 @@ To lint the source as you make changes you can install the [eslint extension](ht
 
 ## Work Branches
 
-Even if you have push rights on the Microsoft/vscode-hexeditorfay repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your personal workflow cruft out of sight.
+Even if you have push rights on the Microsoft/vscode-hexeditor repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your personal workflow cruft out of sight.
 
 ## Pull Requests
 
-Before we can accept a pull request from you, you'll need to sign a [Contributor License Agreement (CLA)](https://cla.opensource.microsoft.com/microsoft/vscode-hexeditorfay). It is an automated process and you only need to do it once.
+Before we can accept a pull request from you, you'll need to sign a [Contributor License Agreement (CLA)](https://cla.opensource.microsoft.com/microsoft/vscode-hexeditor). It is an automated process and you only need to do it once.
 
 To enable us to quickly review and accept your pull requests, always create one pull request per issue and [link the issue in the pull request](https://github.com/blog/957-introducing-issue-mentions). Never merge multiple requests in one unless they have the same root cause. Be sure to keep code changes as small as possible. Avoid pure formatting changes to code that has not been modified otherwise. Pull requests should contain tests whenever possible.
 

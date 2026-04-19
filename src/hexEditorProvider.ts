@@ -57,7 +57,7 @@ export class HexEditorProvider implements vscode.CustomEditorProvider<HexDocumen
 		);
 	}
 
-	private static readonly viewType = "hexEditorFay.hexedit";
+	private static readonly viewType = "hexEditor.hexedit";
 
 	constructor(
 		private readonly _context: vscode.ExtensionContext,
@@ -294,7 +294,7 @@ export class HexEditorProvider implements vscode.CustomEditorProvider<HexDocumen
 	}
 
 	private readEditorSettings(): IEditorSettings {
-		const config = vscode.workspace.getConfiguration("hexeditorfay");
+		const config = vscode.workspace.getConfiguration("hexeditor");
 		const settings: IEditorSettings = { ...defaultEditorSettings };
 		for (const key of editorSettingsKeys) {
 			if (config.has(key)) {
@@ -305,7 +305,7 @@ export class HexEditorProvider implements vscode.CustomEditorProvider<HexDocumen
 	}
 
 	private writeEditorSettings(settings: IEditorSettings) {
-		const config = vscode.workspace.getConfiguration("hexeditorfay");
+		const config = vscode.workspace.getConfiguration("hexeditor");
 		for (const key of editorSettingsKeys) {
 			const existing = config.inspect(key);
 			const target = !existing

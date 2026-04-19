@@ -7,7 +7,7 @@ A custom editor extension for Visual Studio Code which provides a hex editor for
 - Editing with undo, redo, copy, and paste support
 - Find and replace
 
-![User opens a text file named release.txt and switches to the hex editor via command palette. The user then navigates and edits the document](https://raw.githubusercontent.com/microsoft/vscode-hexeditorfay/main/hex-editor.gif)
+![User opens a text file named release.txt and switches to the hex editor via command palette. The user then navigates and edits the document](https://raw.githubusercontent.com/microsoft/vscode-hexeditor/main/hex-editor.gif)
 
 ## How to Use
 
@@ -21,17 +21,17 @@ The hex editor can be set as the default editor for certain file types by using 
 
 ```json
 "workbench.editorAssociations": {
-    "*.hex": "hexEditorFay.hexedit",
-    "*.ini": "hexEditorFay.hexedit"
+    "*.hex": "hexEditor.hexedit",
+    "*.ini": "hexEditor.hexedit"
 },
 ```
 
 ## Configuring the Data Inspector
 
-By default, the data inspector is shown just to the right of the data grid (or decoded text if enabled), but it can be configured (via the `hexeditorfay.inspectorType` setting) to instead show up while hovering over a data cell.
+By default, the data inspector is shown just to the right of the data grid (or decoded text if enabled), but it can be configured (via the `hexeditor.inspectorType` setting) to instead show up while hovering over a data cell.
 
-Another option is to give the data inspector a dedicated activity bar entry on the left (by setting `hexeditorfay.inspectorType` to `sidebar`) that appears when the hex editor is opened, causing the explorer or whatever sidebar you had opened to be hidden. If preferred, the hex editor view can be dragged into another view by dragging the ⬡ icon onto one of the other views. This can be used in combination with the `hexeditorfay.dataInspector.autoReveal` setting to avoid revealing the sidebar containing the data inspector altogether.
+Another option is to give the data inspector a dedicated activity bar entry on the left (by setting `hexeditor.inspectorType` to `sidebar`) that appears when the hex editor is opened, causing the explorer or whatever sidebar you had opened to be hidden. If preferred, the hex editor view can be dragged into another view by dragging the ⬡ icon onto one of the other views. This can be used in combination with the `hexeditor.dataInspector.autoReveal` setting to avoid revealing the sidebar containing the data inspector altogether.
 
 ## Known Issues
 
-To track existing issues or report a new one, please visit the GitHub Issues page at https://github.com/microsoft/vscode-hexeditorfay/issues
+To track existing issues or report a new one, please visit the GitHub Issues page at https://github.com/microsoft/vscode-hexeditor/issues
