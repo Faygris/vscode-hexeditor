@@ -27,7 +27,14 @@ import _style from "./findWidget.css";
 import { usePersistedState } from "./hooks";
 import * as select from "./state";
 import { strings } from "./strings";
-import { clsx, hexDecode, isHexString, parseHexDigit, throwOnUndefinedAccessInDev } from "./util";
+import {
+	clsx,
+	hexDecode,
+	isHexString,
+	isHexStringWithPlaceholders,
+	parseHexDigit,
+	throwOnUndefinedAccessInDev,
+} from "./util";
 import { VsIconButton, VsIconCheckbox, VsProgressIndicator, VsTextFieldGroup } from "./vscodeUi";
 
 const style = throwOnUndefinedAccessInDev(_style);
@@ -155,6 +162,7 @@ export const FindWidget: React.FC = () => {
 
 	const queryOrError = getSearchQueryOrError(query, isBinaryMode, isRegexp);
 	const replaceOrError = getReplaceOrError(replace, isBinaryMode);
+	const isHexString = isHexStringWithPlaceholders(query);
 
 	const onQueryChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,17 +195,15 @@ export const FindWidget: React.FC = () => {
 	// Prefill the find box with the current selection if present and the query is empty.
 	const prefillFromSelection = useCallback(async () => {
 		try {
-			// Only prefill when query is empty to avoid stomping user input
-			if (query && query.length > 0) {
-				return;
-			}
-
 			const ranges = ctx.getSelectionRanges();
+
+			console.log(previouslyFocusedElement.current);
+			console.log(ranges);
+
 			if (!ranges || ranges.length === 0) {
 				return;
 			}
 
-			// Use the first range (you can expand this to join ranges if desired)
 			const r = ranges[0];
 			const bytesToRead = r.size;
 			if (bytesToRead <= 0) {
@@ -213,15 +219,15 @@ export const FindWidget: React.FC = () => {
 
 			const bytes = new Uint8Array(resp.data);
 
-			if (isBinaryMode) {
-				setQuery(bytesToHex(bytes));
-			} else {
+			if (previouslyFocusedElement.current?.char) {
 				if (isPrintableAscii(bytes)) {
 					setQuery(new TextDecoder().decode(bytes));
 				} else {
 					// fallback to hex if not printable
 					setQuery(bytesToHex(bytes));
 				}
+			} else {
+				setQuery(bytesToHex(bytes));
 			}
 
 			// focus and select the prefilling text so user can immediately modify it
@@ -233,6 +239,8 @@ export const FindWidget: React.FC = () => {
 	}, [ctx, isBinaryMode, query, setQuery]);
 
 	useEffect(() => {
+		console.log(new Date());
+
 		const l = (evt: KeyboardEvent) => {
 			if ((evt.key === "f" || evt.key === "F") && (evt.metaKey || evt.ctrlKey)) {
 				setVisible(true);
@@ -283,12 +291,17 @@ export const FindWidget: React.FC = () => {
 			return;
 		}
 
-		console.log(isBinaryMode);
-		console.log(query);
+		// console.log();
+		// console.log(isBinaryMode);
+		// console.log(query);
+		// console.log(isHexString);
+		// console.log(ctx.selection);
 
-		// if (!isBinaryMode && parseHexStringWithPlaceholders(query)) {
-		// 	setIsBinaryMode(true);
-		// }
+		if (isHexString) {
+			setIsBinaryMode(true);
+		} else {
+			setIsBinaryMode(false);
+		}
 
 		if (typeof queryOrError === "string") {
 			return;

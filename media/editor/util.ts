@@ -112,6 +112,10 @@ export const isHexString = (s: string): boolean => {
 	return true;
 };
 
+export const isHexStringWithPlaceholders = (s: string): boolean => {
+	return /^(?:[0-9A-Fa-f]{2}|\?\?)(?:\s?(?:[0-9A-Fa-f]{2}|\?\?))*$/.test(s);
+};
+
 export const parseHexDigit = (s: string): number | undefined => {
 	switch (s) {
 		case "0":

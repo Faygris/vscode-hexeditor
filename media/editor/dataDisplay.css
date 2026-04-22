@@ -79,13 +79,18 @@
 }
 
 .data-cell-selected {
-	background: var(--vscode-editor-selectionBackground);
+	background: var(--vscode-editor-selectionBackground) !important;
 	color: var(--vscode-editor-selectionForeground);
 }
 
 .data-cell-selected-hovered {
 	background: var(--vscode-editor-inactiveSelectionBackground);
 	color: inherit;
+}
+
+.data-cell-occurrence {
+	background: color-mix(in srgb, var(--vscode-editor-selectionBackground) 60%, transparent);
+	color: var(--vscode-editor-selectionForeground);
 }
 
 .data-cell-unsaved {

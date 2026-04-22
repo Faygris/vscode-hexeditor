@@ -48,12 +48,15 @@ export class DisplayContext {
 	);
 	private _hoveredByte?: FocusedElement;
 	private _focusedByte?: FocusedElement;
+	private _occurrenceRanges: readonly Range[] = [];
 	private _unsavedRanges: readonly Range[] = [];
+	private readonly occurrenceRangesEmitter = new EventEmitter<readonly Range[]>();
 	private readonly unsavedRangesEmitter = new EventEmitter<readonly Range[]>();
 	private readonly selectionChangeEmitter = new EventEmitter<{
 		range: Range;
 		isSingleSwap: boolean;
 	}>();
+	private readonly selectionStateEmitter = new EventEmitter<readonly Range[]>();
 	private readonly hoverChangeEmitter = new EventEmitter<FocusedElement | undefined>();
 	private readonly hoverChangeHandlers = new Map<bigint, (isSelected: boolean) => void>();
 	private readonly focusChangeEmitter = new EventEmitter<FocusedElement | undefined>();
@@ -85,6 +88,26 @@ export class DisplayContext {
 		return this.selectionChangeEmitter.addListener(evt => {
 			if (evt.range.includes(forByte)) {
 				listener(evt.isSingleSwap);
+			}
+		});
+	}
+
+	/**
+	 * Emitter that fires when the overall selection ranges change.
+	 */
+	public readonly onDidChangeSelectionState = this.selectionStateEmitter.addListener;
+
+	/**
+	 * Emitter that fires when the occurrence-highlight state for a single byte changes.
+	 */
+	public onDidChangeOccurrenceState(forByte: number, listener: (isOccurrence: boolean) => void): IDisposable {
+		let wasOccurrence = this._occurrenceRanges.some(e => e.includes(forByte));
+
+		return this.occurrenceRangesEmitter.addListener(ranges => {
+			const isOccurrence = ranges.some(r => r.includes(forByte));
+			if (isOccurrence !== wasOccurrence) {
+				wasOccurrence = isOccurrence;
+				listener(isOccurrence);
 			}
 		});
 	}
@@ -190,6 +213,21 @@ export class DisplayContext {
 	}
 
 	/**
+	 * Gets the currently highlighted selection occurrence ranges.
+	 */
+	public get occurrenceRanges(): readonly Range[] {
+		return this._occurrenceRanges;
+	}
+
+	/**
+	 * Sets the currently highlighted selection occurrence ranges.
+	 */
+	public set occurrenceRanges(ranges: readonly Range[]) {
+		this._occurrenceRanges = ranges;
+		this.occurrenceRangesEmitter.emit(ranges);
+	}
+
+	/**
 	 * Gets the currently hovered byte, if any.
 	 */
 	public get hoveredByte(): FocusedElement | undefined {
@@ -288,6 +326,13 @@ export class DisplayContext {
 		return selected;
 	}
 
+	/**
+	 * Gets whether the given byte is part of a selection occurrence highlight.
+	 */
+	public isOccurrence(byte: number): boolean {
+		return this._occurrenceRanges.some(range => range.includes(byte));
+	}
+
 	private publishSelections() {
 		let selected = 0;
 		for (const range of this.getSelectionRanges()) {
@@ -308,6 +353,8 @@ export class DisplayContext {
 			selected: selected,
 			focused: this._focusedByte?.byte,
 		});
+
+		this.selectionStateEmitter.emit(this.getSelectionRanges());
 	}
 
 	/**
@@ -409,6 +456,20 @@ export const useIsHovered = (element: FocusedElement): boolean => {
 	}, [element.key]);
 
 	return hovered;
+};
+
+/** Hook that returns whether the given byte is highlighted as a selection occurrence */
+export const useIsOccurrence = (byte: number): boolean => {
+	const ctx = useDisplayContext();
+	const [occurrence, setOccurrence] = useState(ctx.isOccurrence(byte));
+
+	useEffect(() => {
+		setOccurrence(ctx.isOccurrence(byte));
+		const disposable = ctx.onDidChangeOccurrenceState(byte, setOccurrence);
+		return () => disposable.dispose();
+	}, [byte]);
+
+	return occurrence;
 };
 
 /** Hook that returns whether the given byte is hovered */

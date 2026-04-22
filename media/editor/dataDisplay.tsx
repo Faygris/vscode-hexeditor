@@ -2,7 +2,7 @@
 // Licensed under the MIT license
 
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilCallback, useRecoilValue, useSetRecoilState } from "recoil";
 import { HexDecorator } from "../../shared/decorators";
 import { EditRangeOp, HexDocumentEditOp } from "../../shared/hexDocumentModel";
 import {
@@ -20,6 +20,7 @@ import {
 	FocusedElement,
 	useDisplayContext,
 	useIsFocused,
+	useIsOccurrence,
 	useIsHovered,
 	useIsSelected,
 	useIsUnsaved,
@@ -53,6 +54,29 @@ const Byte: React.FC<{ value: number }> = ({ value }) => (
 // Byte cells are square, and show two (hex) characters, but text cells show a
 // single character so can be narrower--by this constant multiplier.
 const textCellWidth = 0.7;
+
+const findOccurrencesInViewport = (
+	needle: Uint8Array,
+	haystack: Uint8Array,
+	viewportStart: number,
+): Range[] => {
+	if (needle.length === 0 || haystack.length < needle.length) {
+		return [];
+	}
+
+	const ranges: Range[] = [];
+	outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+		for (let j = 0; j < needle.length; j++) {
+			if (haystack[i + j] !== needle[j]) {
+				continue outer;
+			}
+		}
+
+		ranges.push(new Range(viewportStart + i, viewportStart + i + needle.length));
+	}
+
+	return ranges;
+};
 
 const DataCellGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, ...props }) => (
 	<div className={style.dataCellGroup} {...props}>
@@ -115,18 +139,32 @@ const DataInspector: React.FC = () => {
 
 export const DataDisplay: React.FC = () => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const offset = useRecoilValue(select.offset);
 	const setOffset = useSetRecoilState(select.offset);
 	const setScrollBounds = useSetRecoilState(select.scrollBounds);
 	const columnWidth = useRecoilValue(select.columnWidth);
 	const dimensions = useRecoilValue(select.dimensions);
 	const fileSize = useRecoilValue(select.fileSize);
 	const copyType = useRecoilValue(select.copyType);
+	const edits = useRecoilValue(select.edits);
 	const allEditTimeline = useRecoilValue(select.allEditTimeline);
 	const unsavedEditIndex = useRecoilValue(select.unsavedEditIndex);
 	const ctx = useDisplayContext();
+	const [selectionVersion, setSelectionVersion] = useState(0);
 	const [pasting, setPasting] = useState<
 		{ target: HTMLElement; offset: number; data: string } | undefined
 	>();
+	const loadEditedDataRange = useRecoilCallback(
+		({ snapshot }) =>
+			(offset: number, bytes: number) =>
+				snapshot.getPromise(select.editedDataRange({ offset, bytes })),
+		[],
+	);
+
+	useEffect(() => {
+		const disposable = ctx.onDidChangeSelectionState(() => setSelectionVersion(v => v + 1));
+		return () => disposable.dispose();
+	}, [ctx]);
 
 	useEffect(() => {
 		const l = () => {
@@ -135,6 +173,55 @@ export const DataDisplay: React.FC = () => {
 		window.addEventListener("mouseup", l, { passive: true });
 		return () => window.removeEventListener("mouseup", l);
 	}, []);
+
+	useEffect(() => {
+		let isDisposed = false;
+
+		const updateOccurrences = async () => {
+			const selectionRanges = ctx.getSelectionRanges();
+			if (selectionRanges.length !== 1) {
+				ctx.occurrenceRanges = [];
+				return;
+			}
+
+			const [selectionRange] = selectionRanges;
+			if (selectionRange.size <= 0) {
+				ctx.occurrenceRanges = [];
+				return;
+			}
+
+			const displayedBytes = Math.max(0, select.getDisplayedBytes(dimensions, columnWidth));
+			const visibleEnd =
+				fileSize === undefined ? offset + displayedBytes : Math.min(fileSize, offset + displayedBytes);
+			const visibleBytes = Math.max(0, visibleEnd - offset);
+
+			if (visibleBytes === 0 || selectionRange.size > visibleBytes) {
+				ctx.occurrenceRanges = [];
+				return;
+			}
+
+			const [needle, haystack] = await Promise.all([
+				loadEditedDataRange(selectionRange.start, selectionRange.size),
+				loadEditedDataRange(offset, visibleBytes),
+			]);
+
+			if (isDisposed) {
+				return;
+			}
+
+			ctx.occurrenceRanges = findOccurrencesInViewport(needle, haystack, offset);
+		};
+
+		updateOccurrences().catch(() => {
+			if (!isDisposed) {
+				ctx.occurrenceRanges = [];
+			}
+		});
+
+		return () => {
+			isDisposed = true;
+		};
+	}, [ctx, selectionVersion, offset, dimensions, columnWidth, fileSize, edits.length, loadEditedDataRange]);
 
 	// When the focused byte changes, make sure it's in view
 	useEffect(() => {
@@ -329,7 +416,11 @@ const DataRows: React.FC = () => {
 
 	const rows: React.ReactChild[] = [];
 	// i === startPageStartsAt so that we always show at least 1 page, allowing users to append to empty files (#534)
-	for (let i = startPageStartsAt; i <= endPageStartsAt && (i === startPageStartsAt || i < fileSize); i += dataPageSize) {
+	for (
+		let i = startPageStartsAt;
+		i <= endPageStartsAt && (i === startPageStartsAt || i < fileSize);
+		i += dataPageSize
+	) {
 		rows.push(
 			<DataPage
 				key={i}
@@ -654,6 +745,7 @@ const DataCell: React.FC<{
 
 	const isHovered = useIsHovered(focusedElement);
 	const isSelected = useIsSelected(offset);
+	const isOccurrence = useIsOccurrence(offset);
 
 	const editStyle =
 		editMode === HexDocumentEditOp.Replace
@@ -674,6 +766,7 @@ const DataCell: React.FC<{
 				isAppend && style.dataCellAppend,
 				isFocused && editStyle,
 				isHovered && style.dataCellHovered,
+				isOccurrence && style.dataCellOccurrence,
 				isSelected && style.dataCellSelected,
 				isHovered && isSelected && style.dataCellSelectedHovered,
 				useIsUnsaved(offset) && style.dataCellUnsaved,

@@ -462,6 +462,48 @@ export const editedDataPages = selectorFamily({
 			}
 
 			return target.subarray(0, soFar);
+	},
+	cachePolicy_UNSTABLE: {
+		eviction: "lru",
+		maxSize: 1024,
+	},
+});
+
+export const editedDataRange = selectorFamily({
+	key: "editedDataRange",
+	get:
+		({ offset, bytes }: { offset: number; bytes: number }) =>
+		async ({ get }) => {
+			const pageSize = get(dataPageSize);
+			const { ranges } = get(unsavedAndDecoratorEditTimeline);
+			const target = new Uint8Array(bytes);
+			const it = readUsingRanges(
+				{
+					read: (readOffset, readTarget) => {
+						const pageNo = Math.floor(readOffset / pageSize);
+						const page = get(rawDataPages(pageNo));
+						const start = readOffset - pageNo * pageSize;
+						const len = Math.min(page.byteLength - start, readTarget.byteLength);
+						readTarget.set(page.subarray(start, start + len), 0);
+						return Promise.resolve(len);
+					},
+				},
+				ranges,
+				offset,
+				bytes,
+			);
+
+			let soFar = 0;
+			for await (const chunk of it) {
+				const read = Math.min(chunk.length, target.length - soFar);
+				target.set(chunk.subarray(0, read), soFar);
+				soFar += read;
+				if (soFar === bytes) {
+					return target;
+				}
+			}
+
+			return target.subarray(0, soFar);
 		},
 	cachePolicy_UNSTABLE: {
 		eviction: "lru",
